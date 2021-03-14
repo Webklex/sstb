@@ -33,11 +33,18 @@ func (j *Job) SendPoloniexSummary() {
 	for _, t := range trades {
 		if t.Type == "sell" {
 			if _, ok := j.orders[t.OrderNumber]; !ok {
-				// Order is no longer active
-				if _, ok := orders[t.OrderNumber]; !ok {
-					orders[t.OrderNumber] = make([]*poloniex.Trade, 0)
+				td, _ := time.Parse("2006-01-02 15:04:05", t.Date)
+
+				if now.Sub(td).Hours() <= 24 {
+					// Order is no longer active
+					if _, ok := orders[t.OrderNumber]; !ok {
+						orders[t.OrderNumber] = make([]*poloniex.Trade, 0)
+						numSellOrders++
+					}
+					orders[t.OrderNumber] = append(orders[t.OrderNumber], t)
 				}
-				orders[t.OrderNumber] = append(orders[t.OrderNumber], t)
+
+
 			}
 		} else {
 			if _, ok := j.orders[t.OrderNumber]; !ok {
@@ -57,8 +64,6 @@ func (j *Job) SendPoloniexSummary() {
 	tprof := values.NewEmptyFloat()
 
 	for _, og := range orders {
-		td := now
-
 		total := values.NewEmptyFloat()
 		amount := values.NewEmptyFloat()
 		rate := values.NewEmptyFloat()
@@ -69,21 +74,16 @@ func (j *Job) SendPoloniexSummary() {
 			amount = amount.Add(&t.Amount)
 			rate = &t.Rate
 			fee = fee.Add(&t.Fee)
-			td, err = time.Parse("2006-01-02 15:04:05", t.Date)
 		}
 
-		if now.Sub(td).Hours() <= 24 {
-			orate := rate.Sub(j.getStep("sell"))
-			ototal := amount.Mul(orate)
-			odif := total.Sub(ototal)
+		orate := rate.Sub(j.getStep("sell"))
+		ototal := amount.Mul(orate)
+		odif := total.Sub(ototal)
 
-			dif := odif.Sub(odif.Div(values.HundredFloat).Mul(&j.Fee))
+		dif := odif.Sub(odif.Div(values.HundredFloat).Mul(&j.Fee))
 
-			tvol = tvol.Add(amount)
-			tprof = tprof.Add(dif)
-
-			numSellOrders++
-		}
+		tvol = tvol.Add(amount)
+		tprof = tprof.Add(dif)
 	}
 
 	totalProfit := tprof.Div(&j.Volume).Mul(values.HundredFloat)

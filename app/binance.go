@@ -37,7 +37,7 @@ func (j *Job) SendBinanceSummary() {
 
 		if o.Side == binance.SideTypeSell && o.Status == binance.OrderStatusTypeFilled {
 
-			if now.Sub(td).Hours() <= 27 {
+			if now.Sub(td).Hours() <= 24 {
 
 				sellAmount := values.NewFloatFromString(o.OrigQuantity)
 				sellRate := values.NewFloatFromString(o.Price)
@@ -56,7 +56,7 @@ func (j *Job) SendBinanceSummary() {
 				numSellOrders++
 			}
 		} else if o.Side == binance.SideTypeBuy && o.Status == binance.OrderStatusTypeFilled {
-			if now.Sub(td).Hours() <= 27 {
+			if now.Sub(td).Hours() <= 24 {
 				numBuyOrders++
 			}
 		}

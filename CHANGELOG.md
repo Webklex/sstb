@@ -7,6 +7,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 ## [UNRELEASED]
 ### Fixed
 - Daily statistics fixed
+- Prevent idle alert spam
 
 ### Added
 - Idle alert support added

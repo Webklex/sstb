@@ -194,6 +194,13 @@ func (j *Job) subBalance(asset string, value *values.Float) {
 func (j *Job) SendIdleAlert() {
 	text := fmt.Sprintf("#### %s on %s is idling\n", strings.ToUpper(j.Symbol), strings.ToUpper(j.Provider.Name))
 	j.Notify(text)
+	j.touch()
+}
+
+func (j *Job) touch() {
+	j.mx.Lock()
+	j.lastOperation = time.Now()
+	j.mx.Unlock()
 }
 
 func (j *Job) Notify(msg string) {
@@ -213,7 +220,5 @@ func (j *Job) NotifyOrder(pf float64, amt float64, total float64, dif float64, d
 		j.Notify(text)
 	}
 
-	j.mx.Lock()
-	j.lastOperation = time.Now()
-	j.mx.Unlock()
+	j.touch()
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/adshao/go-binance/v2"
 	"os"
 	"sync"
+	"time"
 )
 
 type Build struct {
@@ -53,6 +54,7 @@ type Job struct {
 	orders  map[int64]*Order         `json:"-"`
 	balance map[string]*values.Float `json:"-"`
 
+	lastOperation time.Time `json:"-"`
 	mx sync.Mutex `json:"-"`
 
 	PoloniexClient *poloniex.Config     `json:"-"`
@@ -63,6 +65,7 @@ type Job struct {
 type Alert struct {
 	Buy     bool `json:"buy"`
 	Sell    bool `json:"sell"`
+	Idle    int  `json:"idle"`
 	Summary bool `json:"summary"`
 }
 

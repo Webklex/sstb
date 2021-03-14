@@ -142,6 +142,12 @@ func (a *App) Start() {
 						go j.SendBinanceSummary()
 					}
 				}
+
+				if j.Alert.Idle > 0 {
+					if int(t.Sub(j.lastOperation).Minutes()) > j.Alert.Idle {
+						go j.SendIdleAlert()
+					}
+				}
 			}
 		}
 	}

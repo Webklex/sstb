@@ -9,10 +9,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 - NaN
 
 ### Added
-- NaN
-
-### Affected Classes
-- NaN
+- Idle alert support added
 
 ### Breaking changes
 - NaN

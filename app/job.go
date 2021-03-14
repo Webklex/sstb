@@ -14,6 +14,7 @@ import (
 	"reflect"
 	"strings"
 	"sync"
+	"time"
 )
 
 var (
@@ -45,13 +46,15 @@ func NewDefaultJob() *Job {
 		Alert: &Alert{
 			Buy:     true,
 			Sell:    true,
+			Idle:    0,
 			Summary: true,
 		},
-		mx:          sync.Mutex{},
-		orders:      make(map[int64]*Order),
-		balance:     make(map[string]*values.Float),
-		NotifierIds: make([]string, 0),
-		Notifier:    make([]*notifier.Notifier, 0),
+		lastOperation: time.Now(),
+		mx:            sync.Mutex{},
+		orders:        make(map[int64]*Order),
+		balance:       make(map[string]*values.Float),
+		NotifierIds:   make([]string, 0),
+		Notifier:      make([]*notifier.Notifier, 0),
 	}
 	j.SetContext(j)
 
@@ -112,7 +115,7 @@ func (j *Job) getStep(d string) *values.Float {
 		if j.SellStep.Gt(values.ZeroFloat) {
 			return &j.SellStep
 		}
-	}else{
+	} else {
 		if j.BuyStep.Gt(values.ZeroFloat) {
 			return &j.BuyStep
 		}
@@ -188,6 +191,11 @@ func (j *Job) subBalance(asset string, value *values.Float) {
 	j.setBalance(asset, balance.Sub(value))
 }
 
+func (j *Job) SendIdleAlert() {
+	text := fmt.Sprintf("#### %s on %s is idling\n", strings.ToUpper(j.Symbol), strings.ToUpper(j.Provider.Name))
+	j.Notify(text)
+}
+
 func (j *Job) Notify(msg string) {
 	for _, n := range j.Notifier {
 		go n.Send(msg)
@@ -204,4 +212,8 @@ func (j *Job) NotifyOrder(pf float64, amt float64, total float64, dif float64, d
 	if (j.Alert.Sell && direction == "sell") || (j.Alert.Buy && direction == "buy") {
 		j.Notify(text)
 	}
+
+	j.mx.Lock()
+	j.lastOperation = time.Now()
+	j.mx.Unlock()
 }

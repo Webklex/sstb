@@ -439,6 +439,7 @@ Create a new file `/opt/sstb/config/jobs/first-binance-bot.json` with a content 
   "alerts": {
     "buy": true,
     "sell": true,
+    "idle": 300,
     "summary": true
   },
   "notifier": ["my-mattermost-server"]
@@ -447,7 +448,8 @@ Create a new file `/opt/sstb/config/jobs/first-binance-bot.json` with a content 
 
 This job will trade `DOGE/BTC` on your defined Binance account with a step size of 
 `0.00000001 BTC`, a volume of `0.00010200 BTC` and will send a notification via mattermost for 
-all possible alerts (sell, buy and daily summary).
+all possible alerts (sell, buy, daily summary and an idle alert if nor order has been placed 
+for over 300 minutes).
 
 
 Create an other file `/opt/sstb/config/jobs/first-poloniex-bot.json` with a content like this:
@@ -847,6 +849,7 @@ Example `config/jobs/second-job.json`:
 | notifier       | []string | An array of notifier names defined inside your `config/app.json` file |
 | alerts.buy     | bool     | Send a notification if a buy order is created |
 | alerts.sell    | bool     | Send a notification if a sell order is created |
+| alerts.idle    | int      | Send an idle alert if no order has been placed for a given number of minutes |
 | alerts.summary | bool     | Send a daily trading summary (every day at 10:00am UTC) |
 
 ### Logging

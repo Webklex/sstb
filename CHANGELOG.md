@@ -6,6 +6,16 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 ## [UNRELEASED]
 ### Fixed
+- NaN
+
+### Added
+- NaN
+
+### Breaking changes
+- NaN
+
+## [1.0.1] - 2021-03-16
+### Fixed
 - Daily statistics fixed
 - Prevent idle alert spam
 - Summary will use the local order backups instead of requesting them from the exchange 

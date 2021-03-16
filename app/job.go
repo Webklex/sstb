@@ -123,6 +123,20 @@ func (j *Job) Tick(t time.Time) {
 		}
 	}
 }
+
+func (j *Job) Validate() {
+	if j.Provider.Exchange == "poloniex" {
+
+	} else {
+		for _, o := range j.orders {
+			if o.Side == "sell" {
+				return
+			}
+		}
+		go j.cancelAllBinOrders()
+	}
+}
+
 func (j *Job) StartPoloniex() {
 	if orders, err := j.PoloniexClient.GetOpenOrders(j.Symbol); err == nil {
 		j.parsePolOpenOrders(orders)

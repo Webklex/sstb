@@ -37,6 +37,7 @@ type Job struct {
 	Symbol    string `json:"symbol"`
 	Primary   string `json:"primary"`
 	Secondary string `json:"-"`
+	OrderDir  string `json:"order-dir"`
 
 	Volume      values.Float `json:"volume,string"`
 	Step        values.Float `json:"step,string"`
@@ -54,8 +55,8 @@ type Job struct {
 	orders  map[int64]*Order         `json:"-"`
 	balance map[string]*values.Float `json:"-"`
 
-	lastOperation time.Time `json:"-"`
-	mx sync.Mutex `json:"-"`
+	lastOperation time.Time  `json:"-"`
+	mx            sync.Mutex `json:"-"`
 
 	PoloniexClient *poloniex.Config     `json:"-"`
 	BinanceClient  *binance.Client      `json:"-"`
@@ -63,10 +64,10 @@ type Job struct {
 }
 
 type Alert struct {
-	Buy     bool `json:"buy"`
-	Sell    bool `json:"sell"`
-	Idle    int  `json:"idle"`
-	Summary bool `json:"summary"`
+	Buy     bool  `json:"buy"`
+	Sell    bool  `json:"sell"`
+	Idle    int   `json:"idle"`
+	Summary []int `json:"summary"`
 }
 
 // https://github.com/binance/binance-spot-api-docs/blob/master/user-data-stream.md

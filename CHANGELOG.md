@@ -11,6 +11,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 
 ### Added
 - Idle alert support added
+- Save fulfilled orders as json
 
 ### Breaking changes
 - NaN

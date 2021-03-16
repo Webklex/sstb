@@ -196,6 +196,17 @@ func (j *Job) wsHandler() func(message []byte) {
 					diff := total.Sub(evt.Quantity.Mul(&evt.Price))
 					d, _ := diff.Float64()
 
+					go j.SaveOrder(&Order{
+						Id:     evt.OrderId,
+						Volume: &evt.Quantity,
+						Price:  &evt.Price,
+						Total:  total,
+						Fee:    buyFee,
+						Side:   "buy",
+						Status: "filled",
+						Date:   time.Now(),
+					})
+
 					go j.NotifyOrder(pf, amt, tot, d, "sell")
 
 				} else if to.Side == binance.SideTypeSell {
@@ -227,6 +238,20 @@ func (j *Job) wsHandler() func(message []byte) {
 
 					diff := evt.Quantity.Mul(&evt.Price).Sub(total)
 					d, _ := diff.Float64()
+
+					dif := evt.Quantity.Div(values.HundredFloat)
+					sellFee := dif.Mul(&j.Fee)
+
+					go j.SaveOrder(&Order{
+						Id:     evt.OrderId,
+						Volume: &evt.Quantity,
+						Price:  &evt.Price,
+						Total:  total,
+						Fee:    sellFee,
+						Side:   "sell",
+						Status: "filled",
+						Date:   time.Now(),
+					})
 
 					go j.NotifyOrder(pf, amt, tot, d, "buy")
 				}

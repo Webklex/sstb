@@ -175,6 +175,20 @@ func (j *Job) HandlePolTradeOrder(to *poloniex.TradeOrder) {
 			}
 			log.Success(fmt.Sprintf("%s ORDER CREATED: %d", strings.ToUpper(j.Provider.Name), to.Number))
 
+
+			sellFee := o.Volume.Div(values.HundredFloat).Mul(&j.Fee)
+
+			go j.SaveOrder(&Order{
+				Id:     o.Id,
+				Volume: o.Volume,
+				Price:  o.Price,
+				Total:  o.Total,
+				Fee:    sellFee,
+				Side:   "sell",
+				Status: "filled",
+				Date:   time.Now(),
+			})
+
 			go j.NotifyOrder(pf, amt, tot, dif, "buy")
 		} else {
 			// create a sell order
@@ -205,6 +219,18 @@ func (j *Job) HandlePolTradeOrder(to *poloniex.TradeOrder) {
 			}
 
 			log.Success(fmt.Sprintf("%s ORDER CREATED: %d", strings.ToUpper(j.Provider.Name), to.Number))
+			buyFee := o.Volume.Div(values.HundredFloat).Mul(&j.Fee)
+
+			go j.SaveOrder(&Order{
+				Id:     o.Id,
+				Volume: o.Volume,
+				Price:  o.Price,
+				Total:  o.Total,
+				Fee:    buyFee,
+				Side:   "buy",
+				Status: "filled",
+				Date:   time.Now(),
+			})
 
 			go j.NotifyOrder(pf, amt, tot, dif, "sell")
 		}

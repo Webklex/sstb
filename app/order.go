@@ -6,14 +6,14 @@ import (
 )
 
 type Order struct {
-	Id     int64
-	Volume *values.Float
-	Price  *values.Float
-	Total  *values.Float
-	Fee    *values.Float
-	Side   string // "sell" or "buy"
-	Status string // "new", "filled", "canceled" or "other"
-	Date   time.Time
+	Id     int64         `json:"id"`
+	Volume *values.Float `json:"volume"`
+	Price  *values.Float `json:"price"`
+	Total  *values.Float `json:"total"`
+	Fee    *values.Float `json:"fee"`
+	Side   string        `json:"side"`   // "sell" or "buy"
+	Status string        `json:"status"` // "new", "filled", "canceled" or "other"
+	Date   time.Time     `json:"date"`
 }
 
 func NewDefaultOrder() *Order {

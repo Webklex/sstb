@@ -11,6 +11,9 @@ import (
 	"fmt"
 	"github.com/mitchellh/mapstructure"
 	"math/big"
+	"os"
+	"path"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"sync"
@@ -34,9 +37,13 @@ func decimalDecodeHook(from reflect.Type, to reflect.Type, v interface{}) (inter
 }
 
 func NewDefaultJob() *Job {
+	dir, _ := os.Getwd()
+
 	j := &Job{
 		Config:     config.DefaultConfig(),
+		OrderDir:   path.Join(dir, "data", "orders"),
 		Symbol:     "",
+		Id:     	"",
 		Primary:    "",
 		ProviderId: "",
 		Volume:     *values.NewEmptyFloat(),
@@ -195,6 +202,67 @@ func (j *Job) SendIdleAlert() {
 	text := fmt.Sprintf("#### %s on %s is idling\n", strings.ToUpper(j.Symbol), strings.ToUpper(j.Provider.Name))
 	j.Notify(text)
 	j.touch()
+}
+
+func (j *Job) CurrentOrderDir() string {
+	d := j.OrderDirForDate(time.Now())
+	filesystem.CreateDirectory(d)
+
+	return d
+}
+
+func (j *Job) LastOrderDir() string {
+	d := j.OrderDirForDate(time.Now().AddDate(0, 0, -1))
+	filesystem.CreateDirectory(d)
+
+	return d
+}
+
+func (j *Job) OrderDirForDate(t time.Time) string {
+	d := path.Join(j.OrderDir, t.Format("2006-01-02"), j.Id)
+	return d
+}
+
+func (j *Job) loadOrders(dir string) []*Order {
+	orders := make([]*Order, 0)
+
+	_ = filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if filepath.Ext(path) == ".json" {
+			orders = append(orders, j.LoadOrder(path))
+		}
+		return nil
+	})
+
+	return orders
+}
+
+func (j *Job) SaveOrder(o *Order) {
+	d := j.CurrentOrderDir()
+	filename := fmt.Sprintf("%s/%d.json", d, o.Id)
+
+	c := config.NewConfig()
+	c.RootDir = d
+	c.File = filename
+	c.Silent = true
+	c.SetContext(o)
+
+	_, _ = c.Save()
+}
+
+func (j *Job) LoadOrder(filename string) *Order {
+	d, _ := filepath.Split(filename)
+
+	o := NewDefaultOrder()
+
+	c := config.NewConfig()
+	c.RootDir = d
+	c.File = filename
+	c.SetContext(o)
+	c.Silent = true
+
+	c.Load(filename)
+
+	return o
 }
 
 func (j *Job) touch() {

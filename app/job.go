@@ -114,13 +114,6 @@ func (j *Job) Tick(t time.Time) {
 				j.SendSummary()
 			}
 		}
-
-		if hour == 0 {
-			if j.Provider.Exchange == "binance" {
-				j.setBinanceStepSize()
-				// go j.setBinanceBalance()
-			}
-		}
 	}
 }
 

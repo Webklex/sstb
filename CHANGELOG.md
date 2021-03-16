@@ -8,13 +8,15 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 ### Fixed
 - Daily statistics fixed
 - Prevent idle alert spam
+- Summary will use the local order backups instead of requesting them from the exchange 
 
 ### Added
 - Idle alert support added
 - Save fulfilled orders as json
 
 ### Breaking changes
-- NaN
+- Job config parameter `alert.summary` is now an integer array, where each integer represents the 
+hour you want to generate and send it.
 
 ## [1.0.0] - 2021-03-14
 Initial release

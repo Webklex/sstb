@@ -133,21 +133,7 @@ func (a *App) Start() {
 					continue
 				}
 
-				if t.Minute() == 0 && t.Hour() == 9 {
-					if j.Provider.Exchange == "poloniex" {
-						go j.SendPoloniexSummary()
-					} else if j.Provider.Exchange == "binance" {
-						go j.setBinanceStepSize()
-						// go j.setBinanceBalance()
-						go j.SendBinanceSummary()
-					}
-				}
-
-				if j.Alert.Idle > 0 {
-					if int(t.Sub(j.lastOperation).Minutes()) > j.Alert.Idle {
-						go j.SendIdleAlert()
-					}
-				}
+				go j.Tick(t)
 			}
 		}
 	}

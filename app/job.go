@@ -54,7 +54,7 @@ func NewDefaultJob() *Job {
 			Buy:     true,
 			Sell:    true,
 			Idle:    0,
-			Summary: true,
+			Summary: make([]int, 0),
 		},
 		lastOperation: time.Now(),
 		mx:            sync.Mutex{},
@@ -99,6 +99,30 @@ func (j *Job) Start() {
 	}
 }
 
+func (j *Job) Tick(t time.Time) {
+
+	if j.Alert.Idle > 0 {
+		if int(t.Sub(j.lastOperation).Minutes()) > j.Alert.Idle {
+			j.SendIdleAlert()
+		}
+	}
+
+	if t.Minute() == 0 {
+		hour := t.Hour()
+		for _, i := range j.Alert.Summary {
+			if hour == i {
+				j.SendSummary()
+			}
+		}
+
+		if hour == 0 {
+			if j.Provider.Exchange == "binance" {
+				j.setBinanceStepSize()
+				// go j.setBinanceBalance()
+			}
+		}
+	}
+}
 func (j *Job) StartPoloniex() {
 	if orders, err := j.PoloniexClient.GetOpenOrders(j.Symbol); err == nil {
 		j.parsePolOpenOrders(orders)
@@ -221,6 +245,66 @@ func (j *Job) LastOrderDir() string {
 func (j *Job) OrderDirForDate(t time.Time) string {
 	d := path.Join(j.OrderDir, t.Format("2006-01-02"), j.Id)
 	return d
+}
+
+func (j *Job) SendSummary() {
+	orders := make([]*Order, 0)
+	cd := j.CurrentOrderDir()
+	ld := j.LastOrderDir()
+	for _, o := range j.loadOrders(cd) {
+		orders = append(orders, o)
+	}
+	for _, o := range j.loadOrders(ld) {
+		orders = append(orders, o)
+	}
+
+	now := time.Now()
+
+	vol := values.NewEmptyFloat()
+	prof := values.NewEmptyFloat()
+
+	numBuyOrders := 0
+	numSellOrders := 0
+
+	for _, o := range orders {
+
+		if o.Side == "sell" && o.Status == "filled" {
+
+			if now.Sub(o.Date).Hours() <= 24 {
+
+				sellAmount := o.Volume
+				sellRate := o.Price
+				sellTotal := sellAmount.Mul(sellRate)
+
+				buyAmount := sellAmount
+				buyRate := sellRate.Sub(j.getStep("sell"))
+				buyTotal := buyAmount.Mul(buyRate)
+
+				sellFee := sellTotal.Div(values.HundredFloat).Mul(&j.Fee)
+				buyFee := buyTotal.Div(values.HundredFloat).Mul(&j.Fee)
+
+				vol = vol.Add(buyAmount)
+				prof = prof.Add(sellTotal.Sub(buyTotal).Sub(sellFee).Sub(buyFee))
+
+				numSellOrders++
+			}
+		} else if o.Side == "buy" && o.Status == "filled" {
+			if now.Sub(o.Date).Hours() <= 24 {
+				numBuyOrders++
+			}
+		}
+	}
+
+	totalProfit := prof.Div(&j.Volume).Mul(values.HundredFloat)
+
+	text := fmt.Sprintf("#### %s %s Summary\n", strings.ToUpper(j.Provider.Name), strings.ToUpper(j.Symbol))
+	text = text + `
+| Volume | Profit | Sell Orders | Buy Orders | P%   |
+|:-------|:-------|:------------|:-----------|:-----|`
+	text = text + fmt.Sprintf("\n| %.8f | %.8f | %d | %d | %.4f%% |", vol, prof, numSellOrders, numBuyOrders, totalProfit)
+
+	j.Notify(text)
+
 }
 
 func (j *Job) loadOrders(dir string) []*Order {

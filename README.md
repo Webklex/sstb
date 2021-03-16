@@ -807,7 +807,7 @@ Example `config/jobs/first-job.json`:
   "alerts": {
     "buy": true,
     "sell": true,
-    "summary": true
+    "summary": [8, 20]
   },
   "notifier": ["some-notifier-name"]
 }
@@ -827,7 +827,7 @@ Example `config/jobs/second-job.json`:
   "alerts": {
     "buy": true,
     "sell": false,
-    "summary": true
+    "summary": [8, 20]
   },
   "notifier": ["some-notifier-name"]
 }
@@ -850,7 +850,7 @@ Example `config/jobs/second-job.json`:
 | alerts.buy     | bool     | Send a notification if a buy order is created |
 | alerts.sell    | bool     | Send a notification if a sell order is created |
 | alerts.idle    | int      | Send an idle alert if no order has been placed for a given number of minutes |
-| alerts.summary | bool     | Send a daily trading summary (every day at 10:00am UTC) |
+| alerts.summary | []int    | Send a 24h trading summary at the given hours (0-23) |
 
 ### Logging
 Example `config/log.json`:

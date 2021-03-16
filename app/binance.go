@@ -11,66 +11,10 @@ import (
 	"time"
 )
 
-func (j *Job) SendBinanceSummary() {
-
-	if j.Alert.Summary == false {
-		return
-	}
-
-	now := time.Now()
-	t := now.AddDate(0, 0, -2)
-	orders, err := j.BinanceClient.NewListOrdersService().Symbol(j.Symbol).StartTime(t.Unix() * 1000).Limit(2500).Do(context.Background())
-	if err != nil {
-		log.Error(err)
-		return
-	}
-
-	vol := values.NewEmptyFloat()
-	prof := values.NewEmptyFloat()
-
-	numBuyOrders := 0
-	numSellOrders := 0
-
+func (j *Job) parseBinOpenOrders(orders []*binance.Order) {
 	for _, o := range orders {
-
-		td := time.Unix(int64(o.Time/1000), 0)
-
-		if o.Side == binance.SideTypeSell && o.Status == binance.OrderStatusTypeFilled {
-
-			if now.Sub(td).Hours() <= 24 {
-
-				sellAmount := values.NewFloatFromString(o.OrigQuantity)
-				sellRate := values.NewFloatFromString(o.Price)
-				sellTotal := sellAmount.Mul(sellRate)
-
-				buyAmount := sellAmount
-				buyRate := sellRate.Sub(j.getStep("sell"))
-				buyTotal := buyAmount.Mul(buyRate)
-
-				sellFee := sellTotal.Div(values.HundredFloat).Mul(&j.Fee)
-				buyFee := buyTotal.Div(values.HundredFloat).Mul(&j.Fee)
-
-				vol = vol.Add(buyAmount)
-				prof = prof.Add(sellTotal.Sub(buyTotal).Sub(sellFee).Sub(buyFee))
-
-				numSellOrders++
-			}
-		} else if o.Side == binance.SideTypeBuy && o.Status == binance.OrderStatusTypeFilled {
-			if now.Sub(td).Hours() <= 24 {
-				numBuyOrders++
-			}
-		}
+		j.AttachBinOrder(o)
 	}
-
-	totalProfit := prof.Div(&j.Volume).Mul(values.HundredFloat)
-
-	text := fmt.Sprintf("#### %s %s Summary\n", strings.ToUpper(j.Provider.Name), strings.ToUpper(j.Symbol))
-	text = text + `
-| Volume | Profit | Sell Orders | Buy Orders | P%   |
-|:-------|:-------|:------------|:-----------|:-----|`
-	text = text + fmt.Sprintf("\n| %.8f | %.8f | %d | %d | %.4f%% |", vol, prof, numSellOrders, numBuyOrders, totalProfit)
-
-	j.Notify(text)
 }
 
 func (j *Job) parseBinOpenOrders(orders []*binance.Order) {

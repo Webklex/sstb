@@ -62,17 +62,23 @@ func (c *Config) Load(filename string) bool {
 	if _, err := os.Stat(filename); err == nil {
 		content, err := ioutil.ReadFile(filename)
 		if err != nil {
-			log.Printf("[error] Config file failed to load: %s", err.Error())
+			if !c.Silent {
+				log.Printf("[error] Config file failed to load: %s", err.Error())
+			}
 			return false
 		}
 
 		err = json.Unmarshal(content, c.context)
 		if err != nil {
-			log.Printf("[error] Config file failed to load: %s", err.Error())
+			if !c.Silent {
+				log.Printf("[error] Config file failed to load: %s", err.Error())
+			}
 			return false
 		}
 
-		log.Printf("[info] Config file loaded successfully")
+		if !c.Silent {
+			log.Printf("[info] Config file loaded successfully")
+		}
 
 	} else {
 		_, _ = c.Save()
@@ -88,7 +94,9 @@ func (c *Config) Save() (bool, error) {
 
 	file, err := json.MarshalIndent(c.context, "", "\t")
 	if err != nil {
-		fmt.Println(err)
+		if !c.Silent {
+			log.Printf("[error] Config file failed to save: %s", err.Error())
+		}
 		return false, err
 	} else if string(file) == "" {
 		return true, nil
@@ -96,11 +104,15 @@ func (c *Config) Save() (bool, error) {
 
 	err = ioutil.WriteFile(c.File, file, 0644)
 	if err != nil {
-		panic(err)
+		if !c.Silent {
+			log.Printf("[error] Config file failed to save: %s", err.Error())
+		}
 		return false, err
 	}
 
-	log.Printf("[info] Config file saved under: %s", c.File)
+	if !c.Silent {
+		log.Printf("[info] Config file saved under: %s", c.File)
+	}
 
 	return true, nil
 }

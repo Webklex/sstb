@@ -17,9 +17,10 @@ func (j *Job) parseBinOpenOrders(orders []*binance.Order) {
 	}
 }
 
-func (j *Job) parseBinOpenOrders(orders []*binance.Order) {
-	for _, o := range orders {
-		j.AttachBinOrder(o)
+func (j *Job) cancelAllBinOrders() {
+	if _, err := j.BinanceClient.NewCancelOpenOrdersService().Symbol(j.Symbol).Do(context.Background()); err != nil {
+		log.Error(err)
+		return
 	}
 }
 

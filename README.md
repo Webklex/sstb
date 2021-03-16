@@ -1,14 +1,11 @@
 
 # SSTB - Super Simple Trading Bot
 
-[![Latest Version on Packagist][ico-version]][link-repo]
+[![Latest Version][ico-version]][link-releases]
 [![Software License][ico-license]][link-license]
-[![Total Downloads][ico-downloads]][link-repo]
+[![Total Downloads][ico-downloads]][link-releases]
 [![Hits][ico-hits]][link-hits]
 
-**!! IMPORTANT NOTICE !!**
->I don't take any responsibility for any loss or problems you may experience. You'll use 
->this software and any versions of it at your own risk.
 
 ## Description
 This is a simple trading bot created just for the fun of it and to automate a simple trading 
@@ -75,11 +72,14 @@ up. This will support the future development of this bot.
 ## Introduction
 Prepare yourself for a short reading lesson (10-15 min) and make sure you understand how the bot
 operates before you actually use it. If you have any questions please feel free to create a 
-new issue. If you have more than one question, just create several new issues :)
+new issue. If you have more than one question, just create several new issues.
 
 I've tried to explain the mechanics and used strategy as detailed as possible, but I'm sure I've
 missed something. It's also very likely that you encounter a bug. The bot is written for my
 own special use case and might behave differently if used in another context.
+
+**Please note:** I don't take any responsibility for any loss or problems you may experience. 
+You'll use this software and any versions of it at your own risk.
 
 Please be careful and only use "play money". I'll wish you the best of luck and happy trading :)
 
@@ -440,7 +440,7 @@ Create a new file `/opt/sstb/config/jobs/first-binance-bot.json` with a content 
     "buy": true,
     "sell": true,
     "idle": 300,
-    "summary": true
+    "summary": [8, 20]
   },
   "notifier": ["my-mattermost-server"]
 }
@@ -448,8 +448,8 @@ Create a new file `/opt/sstb/config/jobs/first-binance-bot.json` with a content 
 
 This job will trade `DOGE/BTC` on your defined Binance account with a step size of 
 `0.00000001 BTC`, a volume of `0.00010200 BTC` and will send a notification via mattermost for 
-all possible alerts (sell, buy, daily summary and an idle alert if nor order has been placed 
-for over 300 minutes).
+all possible alerts (sell, buy, summaries (at 08:00 (8am) and 20:00 (8pm)) and an idle alert if 
+no new order has been placed for over 300 minutes).
 
 
 Create an other file `/opt/sstb/config/jobs/first-poloniex-bot.json` with a content like this:
@@ -882,12 +882,13 @@ as many as you want (only limited by the exchange).
 
 ### Tested markets
 I've used and tested the bot with the following markets with different but positive results:
-- DOGE/BTC ($$) 
-- GTO/BTC ($$) 
-- IOST/BTC ($) 
 - ANKR/BTC ($$$+) 
 - CELR/BTC ($$$+) 
+- DOGE/BTC ($$) 
+- GTO/BTC ($$) 
 - AKRO/BTC ($$) 
+- IOTX/BTC ($$) 
+- IOST/BTC ($) 
 
 
 ## Known issues
@@ -952,6 +953,7 @@ The MIT License (MIT). Please see [License File][link-license] for more informat
 [ico-hits]: https://hits.webklex.com/svg/webklex/sstb
 [ico-downloads]: https://img.shields.io/github/downloads/webklex/sstb/total?style=flat-square
 
+[link-releases]: https://github.com/Webklex/sstb/releases
 [link-author]: https://github.com/webklex
 [link-repo]: https://github.com/webklex/sstb
 [link-contributors]: https://github.com/webklex/sstb/graphs/contributors

@@ -98,7 +98,7 @@ type BinanceEvent struct {
 	//`json:"N"`                              // null,                     // Commission asset
 	TransactionTime int64 `json:"T"` // 1499405658657,            // Transaction time
 	//`json:"t"`                              // -1,                       // Trade ID
-	//`json:"I"`                              // 8641984,                  // Ignore
+	Ignore int64 `json:"I"` // 8641984,                  // Ignore
 	// `json:"w"` // true,                     // Is the order on the book?
 	// `json:"m"` // false,                    // Is this trade the maker side?
 	//`json:"M"`                              // false,                    // Ignore

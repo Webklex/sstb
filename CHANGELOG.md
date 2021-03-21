@@ -7,6 +7,7 @@ Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) princip
 ## [UNRELEASED]
 ### Fixed
 - Unnecessary volume step size sync removed
+- Ignored attribute "I" added to prevent type confusion
 
 ### Added
 - NaN
